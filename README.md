@@ -158,6 +158,38 @@ total size is 41.36K  speedup is 0.97
 
 ### Решение:
 
+1 Создаем файл большого размера командой [bigfile.bin](task3/screen_1.png)
+```fallocate -l 10M bigfile.bin ```
+
+2 Для синхронизации используем команду [rsync](task3/screen_2.png)
+```rsync -a --bwlimit=125 -e "ssh" ~/bigfile.bin maksim@192.168.88.216:/tmp/```
+где --bwlimit задаётся в КБ/с.(1 Мбит/с ≈ 125 КБ/с (1,000,000 / 8 ≈ 125,000 байт/с))
+
+3 Проверяем локально и замер времени [time](task3/screen_3.png)
+```/usr/bin/time -p rsync -a --bwlimit=125 --stats ~/bigfile.bin /tmp/```
+```
+
+Number of files: 1 (reg: 1)
+Number of created files: 1 (reg: 1)
+Number of deleted files: 0
+Number of regular files transferred: 1
+Total file size: 10,485,760 bytes
+Total transferred file size: 10,485,760 bytes
+Literal data: 10,485,760 bytes
+Matched data: 0 bytes
+File list size: 0
+File list generation time: 0.001 seconds
+File list transfer time: 0.000 seconds
+Total bytes sent: 10,488,425
+Total bytes received: 35
+
+sent 10,488,425 bytes  received 35 bytes  127,132.85 bytes/sec
+total size is 10,485,760  speedup is 1.00
+real 81.88
+user 0.12
+sys 0.14
+```
+
 
 ### Задание 4*
 
@@ -173,3 +205,5 @@ total size is 41.36K  speedup is 0.97
 
 ### Решение:
 
+1. [Пишем скрипт](task4/rsync_snapshot_backup.sh), который будет производить инкрементное резервное копирование домашней директории пользователя с помощью rsync на другой сервер, должен удалять старые резервные копии (сохранять только последние 5 штук),
+2. [Пишем скрипт](task4/rsync_snapshot_restore.sh), управления резервными копиями, в нем можно выбрать резервную копию и данные восстановятся к состоянию на момент создания данной резервной копии.
