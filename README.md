@@ -61,8 +61,11 @@
    ```
 3. Проверяем
 [Запускаем вручную для проверки](task2/screen1.png)
+
 [Содержимое /tmp/backup/](task2/screen2.png)
+
 [логи выполения скрипта](task2/screen3.png)
+
 ```
 maksim@forzabbx1:/usr/local/sbin$ journalctl -t rsync_backup -n 20 --no-pager
 -- Logs begin at Mon 2026-01-05 19:29:26 UTC, end at Tue 2026-01-27 16:50:49 UTC. --
