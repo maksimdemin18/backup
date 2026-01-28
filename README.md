@@ -19,6 +19,8 @@
    ```
    rsync -a --delete --checksum   --filter='- .*/'   --info=stats2   "$HOME/" /tmp/backup/
    ```
+
+```
 -a архивный режим 
 
 --delete  удаляет в /tmp/backup то, чего нет в источнике
@@ -26,9 +28,11 @@
 --checksum  сравнение по контрольным суммам
 
 --filter='- .*/'  исключает каталоги, начинающиеся с точки
+```
 
 2. [Проверяем домашнюю директорию и выполняем команду](task1/screen1.png)
-3. [м директорию /tmp/backup](task1/screen2.png)
+   
+3. [Проверяем директорию /tmp/backup](task1/screen2.png)
 
 
 ### Задание 2
@@ -47,8 +51,95 @@
 
 ### Решение:
 
+1. Пишем скрипт [rsync_backup.sh](task2/rsync_backup.sh)
 
+2. Добавляем в crontab чтобы резервная копия создавалась раз в день. Выполнячем команду crontab -e и добавляем
+   
+   ```
+   MAILTO=""
+   0 2 * * * SRC="$HOME/" DEST="/tmp/backup/" EXCLUDE_HIDDEN_DIRS=1 LOG_FILE="/tmp/rsync_backup.log" /usr/local/sbin/rsync_backup.sh
+   ```
+3. Проверяем
+[Запускаем вручную для проверки](task2/screen1.png)
+[Содержимое /tmp/backup/](task2/screen2.png)
+[логи выполения скрипта](task2/screen3.png)
+```
+maksim@forzabbx1:/usr/local/sbin$ journalctl -t rsync_backup -n 20 --no-pager
+-- Logs begin at Mon 2026-01-05 19:29:26 UTC, end at Tue 2026-01-27 16:50:49 UTC. --
+Jan 27 16:48:07 forzabbx1 rsync_home_backup[1059187]: OK: SRC=/home/maksim/ DEST=/tmp/backup/
+Jan 27 16:48:08 forzabbx1 rsync_home_backup[1059196]: OK: SRC=/home/maksim/ DEST=/tmp/backup/
+Jan 27 16:48:08 forzabbx1 rsync_home_backup[1059205]: OK: SRC=/home/maksim/ DEST=/tmp/backup/
+Jan 27 16:48:08 forzabbx1 rsync_home_backup[1059214]: OK: SRC=/home/maksim/ DEST=/tmp/backup/
+Jan 27 16:48:09 forzabbx1 rsync_home_backup[1059223]: OK: SRC=/home/maksim/ DEST=/tmp/backup/
+Jan 27 16:48:09 forzabbx1 rsync_home_backup[1059232]: OK: SRC=/home/maksim/ DEST=/tmp/backup/
+Jan 27 16:48:09 forzabbx1 rsync_home_backup[1059241]: OK: SRC=/home/maksim/ DEST=/tmp/backup/
+Jan 27 16:48:09 forzabbx1 rsync_home_backup[1059252]: OK: SRC=/home/maksim/ DEST=/tmp/backup/
+Jan 27 16:48:10 forzabbx1 rsync_home_backup[1059261]: OK: SRC=/home/maksim/ DEST=/tmp/backup/
+Jan 27 16:48:10 forzabbx1 rsync_home_backup[1059270]: OK: SRC=/home/maksim/ DEST=/tmp/backup/
+Jan 27 16:48:10 forzabbx1 rsync_home_backup[1059279]: OK: SRC=/home/maksim/ DEST=/tmp/backup/
+Jan 27 16:48:10 forzabbx1 rsync_home_backup[1059288]: OK: SRC=/home/maksim/ DEST=/tmp/backup/
+Jan 27 16:48:11 forzabbx1 rsync_home_backup[1059297]: OK: SRC=/home/maksim/ DEST=/tmp/backup/
+Jan 27 16:48:11 forzabbx1 rsync_home_backup[1059306]: OK: SRC=/home/maksim/ DEST=/tmp/backup/
+Jan 27 16:48:11 forzabbx1 rsync_home_backup[1059315]: OK: SRC=/home/maksim/ DEST=/tmp/backup/
+Jan 27 16:48:12 forzabbx1 rsync_home_backup[1059324]: OK: SRC=/home/maksim/ DEST=/tmp/backup/
+Jan 27 16:48:12 forzabbx1 rsync_home_backup[1059333]: OK: SRC=/home/maksim/ DEST=/tmp/backup/
+Jan 27 16:48:12 forzabbx1 rsync_home_backup[1059342]: OK: SRC=/home/maksim/ DEST=/tmp/backup/
+Jan 27 16:48:12 forzabbx1 rsync_home_backup[1059351]: OK: SRC=/home/maksim/ DEST=/tmp/backup/
+Jan 27 16:49:03 forzabbx1 rsync_home_backup[1059395]: OK: SRC=/home/maksim/ DEST=/tmp/backup/
+```
+Можем проверить лог выполнения скрипта
+```
+maksim@forzabbx1:~$ tail -n 50 /tmp/rsync_backup.log
+Matched data: 0 bytes
+File list size: 0
+File list generation time: 0.001 seconds
+File list transfer time: 0.000 seconds
+Total bytes sent: 602
+Total bytes received: 21
 
+sent 602 bytes  received 21 bytes  1.25K bytes/sec
+total size is 41.36K  speedup is 66.39
+
+2026-01-27T16:48:12+00:00 OK: SRC=/home/maksim/ DEST=/tmp/backup/
+----- 2026-01-27T16:48:12+00:00 rsync output (rc=0) -----
+
+Number of files: 13 (reg: 10, dir: 3)
+Number of created files: 0
+Number of deleted files: 0
+Number of regular files transferred: 0
+Total file size: 41.36K bytes
+Total transferred file size: 0 bytes
+Literal data: 0 bytes
+Matched data: 0 bytes
+File list size: 0
+File list generation time: 0.001 seconds
+File list transfer time: 0.000 seconds
+Total bytes sent: 602
+Total bytes received: 21
+
+sent 602 bytes  received 21 bytes  1.25K bytes/sec
+total size is 41.36K  speedup is 66.39
+
+2026-01-27T16:49:03+00:00 OK: SRC=/home/maksim/ DEST=/tmp/backup/
+----- 2026-01-27T16:49:03+00:00 rsync output (rc=0) -----
+
+Number of files: 13 (reg: 10, dir: 3)
+Number of created files: 12 (reg: 10, dir: 2)
+Number of deleted files: 0
+Number of regular files transferred: 10
+Total file size: 41.36K bytes
+Total transferred file size: 41.36K bytes
+Literal data: 41.36K bytes
+Matched data: 0 bytes
+File list size: 0
+File list generation time: 0.001 seconds
+File list transfer time: 0.000 seconds
+Total bytes sent: 42.40K
+Total bytes received: 228
+
+sent 42.40K bytes  received 228 bytes  85.26K bytes/sec
+total size is 41.36K  speedup is 0.97
+```
 Задания со звёздочкой*
 Эти задания дополнительные. Их можно не выполнять. На зачёт это не повлияет. Вы можете их выполнить, если хотите глубже разобраться в материале.
 
